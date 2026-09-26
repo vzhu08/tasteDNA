@@ -6,13 +6,17 @@ Then it does the hard version: **it seats a group of people with conflicting pal
 
 🔗 **Live demo:** [taste-dna-seven.vercel.app](https://taste-dna-seven.vercel.app)
 
+## Vincent Zhu's contribution
+
+Vincent worked on **platform and API development** as Developer 3, covering menu extraction and validation, API integration, and Supabase persistence. This was a three-person project, with separate teammates responsible for product/UI and the taste/ranking engine. See the [platform guide](docs/team/DEVELOPER_3_PLATFORM.md) and [implementation handoff](docs/team/DEVELOPER_3_TASK_4_HANDOFF.md) for the scope and technical details.
+
 | By the numbers | |
 | --- | --- |
 | Seed foods for onboarding | **46 dishes across 29 cuisines**, actively selected — you only rate 12 |
 | Taste representation | **12 interpretable flavor/texture dimensions** + a semantic embedding (64-d local, 1,536-d production) |
 | Real campus data | **37 CMU dining venues, 614 real menu items**, ingested through the same pipeline as photographed menus |
 | Group fairness | Misery floor + worst-member weighting + **counterfactual decision questions** |
-| Verification | **271 tests in 53 files**, plus 5 pgTAP suites against the Postgres row-level-security policies |
+| Verification | Vitest unit and integration tests, plus pgTAP suites for Postgres row-level-security policies |
 | Required configuration to run the demo | **None.** Zero environment variables, zero accounts, zero network calls for the core loop |
 
 ---
@@ -221,7 +225,7 @@ The **Venues** map is backed by real data, not lorem ipsum:
 
 Anonymous users get the full solo flow from a single `localStorage` key. Signing in (password or magic link via Supabase Auth) moves ratings and the derived profile behind owner-only row-level security.
 
-**Schema** (`supabase/migrations/`, 6 migrations): users, dishes with `vector(1536)` embeddings, dish features, ratings, taste profiles, menus and menu items, venues, friendships, group sessions/members/candidates/meal preferences, and versioned group recommendation results.
+**Schema** (`supabase/migrations/`): users, dishes with `vector(1536)` embeddings, dish features, ratings, taste profiles, menus and menu items, venues, friendships, group sessions/members/candidates/meal preferences, and versioned group recommendation results.
 
 **Security model.**
 
@@ -231,7 +235,7 @@ Anonymous users get the full solo flow from a single `localStorage` key. Signing
 - **No email enumeration.** Friend requests return the same neutral `202` whether the request was created, already existed, or the address is unknown.
 - **Server-only secrets.** The secret key is used exclusively in route handlers behind the `src/lib/db/` boundary and is never exposed through a `NEXT_PUBLIC_` variable.
 
-Each of the five later migrations ships with a **pgTAP test suite** (`supabase/tests/database/`) that asserts the functions exist and the policies behave as intended for owners, members, and outsiders.
+The repository includes **pgTAP test suites** (`supabase/tests/database/`) that assert database functions exist and policies behave as intended for owners, members, and outsiders.
 
 ---
 
@@ -250,10 +254,10 @@ Honest status, so nothing surprises you in a live demo.
 | Real CMU venue menus in the database | ✅ 37 venues ingested from the compiled dataset |
 | Group fairness engine and decision questions | ✅ Implemented, unit-tested, and wired to live API routes end to end |
 | Friend requests | ✅ Two real accounts created; request/accept and both friend lists verified in Chrome |
-| Private account medication lists and group meal checks | ⚠️ Implemented and locally tested; hosted migration and live medicine/group verification pending |
-| Multi-person group sessions | Wired to real APIs; full live medicine-aware workflow still needs verification |
+| Private account medication lists and group meal checks | Implemented; account persistence, isolation, and group consent/invalidation controls passed the documented September 12 live checks |
+| Multi-person group sessions | Real APIs; invitations and check-ins passed documented live checks. Successful assignments with nonempty medication lists and sufficiently detailed menus remain unverified |
 
-**About the live checks.** The earlier signup/email-rate-limit blocker is resolved for the two authorized test accounts. Password signup/sign-in, request delivery, acceptance, and both friend lists were verified on the deployed site. The new account-medication integration still requires its hosted migration before deploying; full live group-meal medication checks are not yet verified. The [LLM handoff](docs/team/LLM_HANDOFF.md) records the current release dependency and exact checks.
+**About the live checks.** The [release notes](docs/team/LLM_HANDOFF.md#current-verification-and-release-status--september-12-2026) record the September 12 verification: password sign-in, friendships, invitation acceptance, the hosted medication migration, private account persistence, and group consent/invalidation checks. The tested campus menus lacked enough ingredient detail to verify a successful assignment with nonempty medication lists. These are recorded results at those revisions, not a new verification of the current deployment.
 
 ---
 
@@ -266,7 +270,7 @@ Honest status, so nothing surprises you in a live demo.
 - **Typed contracts shared across the team.** `src/types/` holds the domain interfaces; `src/types/group.fixtures.ts` provides canonical scenarios used by both engine and UI tests.
 
 ```bash
-npm test     # 334 tests across 57 files
+npm test     # Run the current unit and integration suite
 npm run lint
 npm run build
 ```
@@ -374,6 +378,6 @@ Three areas developed in parallel without file contention:
 
 - **Product & UI** — `src/app/`, `src/components/`
 - **Taste & ranking** — `src/lib/taste/`, `src/lib/recommendation/`, `src/lib/embeddings/`, `src/lib/group/`
-- **Menu, API & data** — `src/lib/menu/`, `src/app/api/`, `src/lib/db/`, `src/lib/cmu-dining/`, `supabase/`, `scripts/`
+- **Menu, API & data — Vincent Zhu (Developer 3)** — `src/lib/menu/`, `src/app/api/`, `src/lib/db/`, `src/lib/cmu-dining/`, `supabase/`, `scripts/`
 
 Shared contracts live in `src/types/`. Contributor handoffs and per-task notes are in [docs/team/](docs/team/README.md).
